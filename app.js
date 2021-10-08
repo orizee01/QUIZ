@@ -1,11 +1,11 @@
 const quizForm = document.querySelector('.quiz-form')
 const options = quizForm.querySelector('.options')
 const question = quizForm.querySelector('.lead')
-
+const nextBtn = document.querySelector('#next')
+const prevBtn = document.querySelector('#previous')
 
 export let nQuestion = 0;
 export let nCorrect = 0;
-
 
 export let listOfQuestions = [
     {
@@ -72,10 +72,8 @@ export let listOfQuestions = [
         correctAnswer:"All of the Mentioned"
     }     
 ]
-
-
 function generateQuestion(presentQuestion){
-    options.innerHTML +=  `
+    options.innerHTML =  `
     ${
         (() => {
     let options = ''
@@ -83,10 +81,10 @@ function generateQuestion(presentQuestion){
     Object.keys(presentQuestion).forEach((key) => {
                    let markup = ''
                    if(key === 'question'){
-                       question.innerHTML += `${presentQuestion[key]}`
+                       question.innerHTML = `${presentQuestion[key]}`
                    }
                     else if(key === 'options'){
-                        markup +=  presentQuestion[key].map((option,ind) => {return `<div class="form-check my-5 text-white-50"> \n\t<input type="radio" name="q${ind+1}" value="${option}">
+                        markup +=  presentQuestion[key].map((option,ind) => {return `<div class="form-check my-5 text-white-50"> \n\t<input type="radio" name="o${nQuestion}" value="${option}">
     <label class="mx-2 form-check-label">${option}</label>\n</div>`}).join('')
                     }
                        options += markup
@@ -97,5 +95,33 @@ function generateQuestion(presentQuestion){
         }
     `
 }
+// console.log(generateQuestion(listOfQuestions[1]))
+function pageLoad(){
+    generateQuestion(listOfQuestions[nQuestion])
+    prevBtn.disabled = true
+    
+}
+Window.onload = pageLoad()
 
-Window.onload = generateQuestion(listOfQuestions[nQuestion])
+let answers = []
+console.log(answers)
+nextBtn.addEventListener('click',(e)=>{
+    e.preventDefault()
+    let generatedOptions = Array.from(options.querySelectorAll('.form-check')).map((option)=>{
+        return Array.from(option.children).map((item)=>{
+            return (item.tagName == 'INPUT') ?  item.checked  : (item.tagName == 'LABEL') ? item.innerText : ''
+        })
+    })
+    console.log(generatedOptions)
+    for(let i of generatedOptions){
+        if(i[0] === true && nQuestion <= listOfQuestions.length){
+            answers.push(i[1])
+            nQuestion+= 1
+            generateQuestion(listOfQuestions[nQuestion])
+        }
+        else{
+            alert('please select an option')
+            continue
+        }
+    }
+})
